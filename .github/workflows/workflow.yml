@@ -1,0 +1,51 @@
+name: Terraform Payment Infrastructure CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      # Variáveis do Terraform específicas para o Payment
+      TF_VAR_payment_db_admin_user: ${{ secrets.PAYMENT_DB_ADMIN_USER }}
+      TF_VAR_payment_db_admin_password: ${{ secrets.PAYMENT_DB_ADMIN_PASSWORD }}
+      TF_VAR_my_ip_address: ${{ secrets.MY_IP_ADDRESS }}
+      TF_VAR_payment_db_name: ${{ secrets.PAYMENT_DB_NAME }}
+      TF_VAR_payment_db_server: ${{ secrets.PAYMENT_DB_SERVER }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.9.6
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Import Resources
+        run: |
+          terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/MyResourceGroup || true
+          terraform import azurerm_mssql_server.payment_sql_server /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/MyResourceGroup/providers/Microsoft.Sql/servers/${{ env.TF_VAR_payment_db_server }} || true
+          terraform import azurerm_mssql_database.payment_sql_db /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/MyResourceGroup/providers/Microsoft.Sql/servers/${{ env.TF_VAR_payment_db_server }}/databases/${{ env.TF_VAR_payment_db_name }} || true
+          terraform import azurerm_mssql_firewall_rule.allow_azure_access /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/MyResourceGroup/providers/Microsoft.Sql/servers/${{ env.TF_VAR_payment_db_server }}/firewallRules/AllowAzureServices || true
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve
