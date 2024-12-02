@@ -10,7 +10,8 @@ terraform {
 provider "azurerm" {
   features {}
 
-  subscription_id = var.subscription_id 
+  # somente local
+  # subscription_id = var.subscription_id 
 }
 
 resource "azurerm_resource_group" "rg" {

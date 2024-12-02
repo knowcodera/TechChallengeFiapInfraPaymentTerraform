@@ -26,8 +26,9 @@ variable "my_ip_address" {
   sensitive = true
 }
 
-variable "subscription_id" {
-  description = "Azure Subscription ID"
-  type        = string
-  sensitive   = true
-}
+# somente local
+# variable "subscription_id" {
+#   description = "Azure Subscription ID"
+#   type        = string
+#   sensitive   = true
+# }
