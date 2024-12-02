@@ -12,7 +12,6 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     env:
-      # Variáveis do Terraform específicas para o Payment
       TF_VAR_payment_db_admin_user: ${{ secrets.PAYMENT_DB_ADMIN_USER }}
       TF_VAR_payment_db_admin_password: ${{ secrets.PAYMENT_DB_ADMIN_PASSWORD }}
       TF_VAR_my_ip_address: ${{ secrets.MY_IP_ADDRESS }}
