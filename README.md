@@ -1,5 +1,5 @@
 
-# Payment Infrastructure with Terraform
+# Payment - Infra com Terraform
 
 Este repositório contém o código-fonte para provisionar a infraestrutura do microsserviço **Payment** utilizando **Terraform**.
 
